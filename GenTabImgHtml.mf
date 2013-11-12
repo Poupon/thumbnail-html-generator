@@ -1,0 +1,9 @@
+Main-Class: GenTabImgHtml
+Class-Path: GenTabImgHtml
+Specification-Title: GenTabImgHtml
+Specification-Version: 1.0
+Specification-Vendor: Philippe Poupon
+Implementation-Title: GenTabImgHtml
+Implementation-Version: build64
+Implementation-Vendor: Philippe Poupon
+Sealed: true
