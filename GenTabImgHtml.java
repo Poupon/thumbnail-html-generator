@@ -245,7 +245,7 @@ class GenTabImgHtml  {
 	
 	String lEntry[] = lFile.list( );
 
-	writeln( pBufWrite, "<!-- génération des thumbails par GenTabImgHtml (Philippe Poupon)-->");	
+	writeln( pBufWrite, "<!-- generation des thumbails par GenTabImgHtml (Philippe Poupon)-->");	
 
 	
 	// Create table declaration
@@ -266,7 +266,7 @@ class GenTabImgHtml  {
 	    String lExtension = lFileName.substring( lIndexExtension+1 );
 	    
 	    if( Parameter.sSetExtension.contains( lExtension ) == false){
-		// extension non géré par le programme
+		// extension non gere par le programme
 		continue;
 	    }
 	    
@@ -338,7 +338,7 @@ class GenTabImgHtml  {
 	writeln( pBufWrite, "</center>" );
 
 
-	writeln( pBufWrite, "<!-- fin génération des thumbails par GenTabImgHtml (Philippe Poupon)-->");	
+	writeln( pBufWrite, "<!-- fin generation des thumbails par GenTabImgHtml (Philippe Poupon)-->");	
 
 	// finish table declaration
 	
@@ -508,7 +508,7 @@ class GenTabImgHtml  {
 	    
 	    String lEntry[] = lFile.list( );
 	    
-	    // pour toutes les entrées du repertoire courant
+	    // pour toutes les entrees du repertoire courant
 	    for( int i=0; i< lEntry.length; i++) {								
 		String lPath = pPath + "/" + lEntry[i];
 		process( pPath , lPath, lLocalParam );
