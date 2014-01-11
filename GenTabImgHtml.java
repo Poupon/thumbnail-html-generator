@@ -270,13 +270,16 @@ class GenTabImgHtml  {
 		continue;
 	    }
 	    
-	    
+	    String lDestFileNameHead = lFileName.substring( 0, lIndexExtension );
+
 	    // C'est bien un fichier image !
 	    
 	    String lSrcFilePath = pPath + "/" +lLocalParam.cSrcDir  + "/" +lEntry[i];
 	    
 	    String lDestDirName = pParam.cDestExt + "_" + lLocalParam.cSrcDir ;
 	    String lDestDirPath = pPath + "/" + lDestDirName;
+
+
 	    
 	    File lFileSrc = new File( lSrcFilePath );
 	    if( lFileSrc.canRead() == false ){
@@ -287,8 +290,10 @@ class GenTabImgHtml  {
 	    File lDestDirFile  = new File( lDestDirPath );
 	    lDestDirFile.mkdirs();
 	    
-	    String lDestFileName =  pParam.cDestExt + "_" + lEntry[i];
+	    //	    String lDestFileName =  pParam.cDestExt + "_" + lEntry[i];
+	    String lDestFileName =  pParam.cDestExt + "_" + lDestFileNameHead + ".jpg";
 	    String lDestFilePath =  lDestDirPath + "/" + lDestFileName;
+
 	    
 	    Point lSizeThumb = new Point(0,0);
 	    Point lSizeImg   = new Point(0,0);
