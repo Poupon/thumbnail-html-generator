@@ -18,7 +18,7 @@ import javax.imageio.stream.ImageOutputStream;
 
 
 
-/************************
+/***********************T
 Principes:
 
 On creer un fichier thg_*.html avec des commentaires speciaux 
@@ -28,7 +28,7 @@ On creer un fichier thg_*.html avec des commentaires speciaux
 des sous repertoires avec des images
 
 et le prog creer les fichier *.html avec des miniatures (dans des sous repertoires)
-************************/
+(************************/
 
 
 
@@ -39,14 +39,16 @@ class Parameter{
     public static String sDefaultFile="thg.config";
     public static TreeSet<String> sSetExtension  = new TreeSet<String>();
     
+
+
     public String cSrcDir     = "thg_img";
-    public String cDestExt    = "thumb";
+    public String cDestExt    = "thumb_"; //OK
     public int    cThumbSize  = 128;
     public int    cIconHeight = 128;
     public int    cColumns    = 5;
-    public boolean cFlagSize    = false;
-    public boolean cFlagName    = false;
-    public boolean cFlagWH    = false;
+    public boolean cFlagSize   = false;
+    public boolean cFlagName   = false;
+    public boolean cFlagWH     = false;
     public String cTabBorder   = "2";
 
     public Parameter( ){
@@ -117,6 +119,13 @@ class Parameter{
 class GenTabImgHtml  {
     
     
+    public static String sTypeFilePrefix="thg_"; // OK
+
+    public static boolean sEco = false;
+
+    public static String sOutputPath  = null;
+    public static String sFilterExtension = "html";
+
     static String sSign="<!--#";
     //=======
     public enum Command{
@@ -164,6 +173,7 @@ class GenTabImgHtml  {
 	pBufWrite.newLine();									
     }
     //------------------------------------------------
+    //------------------------------------------------
     // Creation d'une image miniature
 
     boolean createMiniature(  String pStrImg, String pDestImg, Parameter pParam, Point lSizeThumb, Point lSizeImg ){
@@ -171,7 +181,15 @@ class GenTabImgHtml  {
 	ImageIcon 	lIcon  = new ImageIcon( pStrImg ); 
 	
 	lSizeImg.setLocation( lIcon.getIconWidth(), lIcon.getIconHeight() );
-	
+
+	if( GenTabImgHtml.sEco ) // NEW NEW NEW 
+	    return true;
+
+	 //lancer en multithread !!! 
+	// Demander un thread d'un pool et si dispos lancer sinon attendre !	    
+	//int getCorePoolSize()
+	//int getMaximumPoolSize()
+
 	float lDiv=1;
 	if( lIcon.getIconWidth()  > lIcon.getIconHeight() ){
 	    lDiv = lIcon.getIconWidth() / (float)pParam.cThumbSize;
@@ -212,7 +230,7 @@ class GenTabImgHtml  {
 	catch(Exception e){
 	    System.err.println( e );
 	}	
-				return true;
+	return true;
     }
     
     //---------------------------------
@@ -225,7 +243,7 @@ class GenTabImgHtml  {
     public boolean makeTab( String pPath, String pSbuf, BufferedWriter pBufWrite, Parameter pParam) throws IOException {
 			
 	
-	//				System.out.println( "makeTab Path:" + pPath + " Buf:"+ pSbuf );
+	System.out.println( "makeTab Path:" + pPath + " Buf:"+ pSbuf );
 	
 	Parameter lLocalParam = new Parameter( pParam );
 	
@@ -258,15 +276,21 @@ class GenTabImgHtml  {
 	int lColumns = 0;
 	for( int i=0; i< lEntry.length; i++) {
 	    String lFileName = lEntry[i];
+
+	    System.out.println( "\t>" + lFileName);
 	    
 	    int lIndexExtension = lFileName.lastIndexOf(".");
-	    if( lIndexExtension == -1 )
+	    if( lIndexExtension == -1 ){
+		
+		System.err.println( "\t\no extension" );
 		continue ;
+	    }
 	    
 	    String lExtension = lFileName.substring( lIndexExtension+1 );
 	    
-	    if( Parameter.sSetExtension.contains( lExtension ) == false){
+	    if( Parameter.sSetExtension.contains( lExtension.toLowerCase() ) == false){
 		// extension non gere par le programme
+		System.err.println( "\t\tbad extension:" + lExtension );
 		continue;
 	    }
 	    
@@ -276,29 +300,45 @@ class GenTabImgHtml  {
 	    
 	    String lSrcFilePath = pPath + "/" +lLocalParam.cSrcDir  + "/" +lEntry[i];
 	    
-	    String lDestDirName = pParam.cDestExt + "_" + lLocalParam.cSrcDir ;
-	    String lDestDirPath = pPath + "/" + lDestDirName;
+	    String lDestDirName = pParam.cDestExt  + lLocalParam.cSrcDir ;
+
+	    String lDestDirPath = pPath  + "/" + lDestDirName;
 
 
+	    if( sOutputPath!= null ) // NEW NEW NEW 
+		lDestDirPath = sOutputPath + lLocalParam.cSrcDir;;
+
+	    
 	    
 	    File lFileSrc = new File( lSrcFilePath );
 	    if( lFileSrc.canRead() == false ){
 		System.err.println( "Error can read file:" + lSrcFilePath );
 		continue;
 	    }
+
 	    
+
+	    System.out.println( "OPath=" + sOutputPath +"->" + lDestDirPath );
+
+
 	    File lDestDirFile  = new File( lDestDirPath );
+
 	    lDestDirFile.mkdirs();
 	    
-	    //	    String lDestFileName =  pParam.cDestExt + "_" + lEntry[i];
-	    String lDestFileName =  pParam.cDestExt + "_" + lDestFileNameHead + ".jpg";
+	    //	    String lDestFileName =  pParam.cDestExt + lEntry[i];
+	    String lDestFileName =  pParam.cDestExt  + lDestFileNameHead + ".jpg";
 	    String lDestFilePath =  lDestDirPath + "/" + lDestFileName;
 
 	    
 	    Point lSizeThumb = new Point(0,0);
 	    Point lSizeImg   = new Point(0,0);
-	    createMiniature( lSrcFilePath, lDestFilePath, lLocalParam, lSizeThumb, lSizeImg);
-	    
+
+	    if(  GenTabImgHtml.sEco == false
+		 || lLocalParam.cFlagSize == true
+		 || lLocalParam.cFlagWH == true ){		
+		createMiniature( lSrcFilePath, lDestFilePath, lLocalParam, lSizeThumb, lSizeImg);
+	    }
+
 	    // Create Line for tab img
 	    //						process(  lPath, lLocalParam, lDecal );
 	    if( lColumns==0)
@@ -330,6 +370,8 @@ class GenTabImgHtml  {
 	    
 	    if( lColumns++ >= lLocalParam.cColumns ){
 		lColumns = 0;
+		//System.out.println("doFile:" + pPath + " " + pFileSrc );
+
 		writeln(  pBufWrite, "     </tr>");
 	    }
 	    
@@ -363,7 +405,7 @@ class GenTabImgHtml  {
 	// Identification du type de fichier
 	//----------------------------------
       
-	//System.out.println("doFile:" + pPath + " " + pFileSrc );
+	System.out.println("doFile:" + pPath + " " + pFileSrc );
 	
 	String lStrFileName = pFileSrc.getName();			
 	
@@ -375,17 +417,17 @@ class GenTabImgHtml  {
 	String lExtension = lStrFileName.substring( lIndexExtension+1 );
 	String lStrName   = lStrFileName.substring( 0, lIndexExtension );
 	
-	if( lStrName.startsWith("thg_" ) == false 
-	    || lExtension.compareTo( "html" ) != 0 ) {	
+	if( lStrName.startsWith( sTypeFilePrefix  ) == false   // NEW NEW NEW 
+	    || lExtension.compareTo(sFilterExtension) != 0 ) {	
 
 	    // pas un thg_*.html : on ne fait rien !
 	    return ;
 	}
 	
-	//				System.out.println("doFile:" + pPath + " " + pFileSrc );
 	
 	// C'est un bon fichier !
 	// On va le lire et ecrire un fichier *.html en generant le code et les miniatures
+	System.out.println("doFile:" + pPath + " " + pFileSrc );
 
 	try {
 	    FileReader lFread = new FileReader( pFileSrc );						
@@ -430,6 +472,8 @@ class GenTabImgHtml  {
 			BufferedReader pBufRead,  BufferedWriter pBufWrite ) throws IOException {
 	int lNumLine = 0;
 	String lSbuf;
+
+	System.out.println( "doFile:" + pPath + "   >" + pFileSrc );
 		    
 	while( (lSbuf=pBufRead.readLine()) != null) {
 	    lNumLine++;
@@ -502,7 +546,7 @@ class GenTabImgHtml  {
     boolean process( String pParentPath, String pPath, Parameter pParam ) {
 	
 	
-	//				System.out.println("process path:" + pPath );
+	System.out.println("process path:" + pPath );
 	
 	File lFile = new File( pPath );
 	
@@ -550,7 +594,7 @@ class GenTabImgHtml  {
 	    
 	    if( arg.startsWith( p_prefix ))
 		{
-		    return arg.substring( l );
+		    return arg.substring( l+1 );
 		}
 				}
 	return pDefault;
@@ -568,7 +612,7 @@ class GenTabImgHtml  {
 	    if( arg.startsWith( p_prefix ))
 		{
 		    try{
-			return new Integer( arg.substring(l));
+			return new Integer( arg.substring(l+1));
 		    }catch(NumberFormatException ex){
 			System.err.println( "Mauvais format pour commande "+p_prefix);
 			return null;
@@ -595,7 +639,16 @@ class GenTabImgHtml  {
     static void Help( int pExit ){
 	System.out.println("GenTabFileHtml v1.0 : Philippe Poupon : 2005 ");
 	System.out.println("Usage:");
-	System.out.println("\t-I(source path)");	
+	System.out.println("\t-InputPath");
+
+	System.out.println("\t-OutputPath");
+	System.out.println("\t-ThumbPrefix=thumb_");
+	System.out.println("\t-PrefixIn=thg_");
+	System.out.println("\t-Extension()=.html");
+	System.out.println("\t-Eco(ne cree pas les images)");
+
+
+	
 	System.exit( pExit );
     }
     //-----------------------------------------------------
@@ -605,12 +658,23 @@ class GenTabImgHtml  {
     public static void main(String[] args) {
 	
 	GenTabImgHtml	 lGenTab = new GenTabImgHtml();
-	String lPath  =  GetParamString( args, "-I", null );	
-	
+	String lPath  =  GetParamString( args, "-InputPath", null );
+
+	GenTabImgHtml.sTypeFilePrefix = GetParamString( args, "-PrefixIn", GenTabImgHtml.sTypeFilePrefix );
+
+	GenTabImgHtml.sEco = GetParam( args, "-Eco" );	
+
+	GenTabImgHtml.sOutputPath = GetParamString( args, "-OutputPath", null  );
+
+	GenTabImgHtml.sFilterExtension = GetParamString( args, "-Extension", GenTabImgHtml.sFilterExtension );
+
 	if( lPath == null || lPath.length() == 0 )
 	    lPath = ".";
 
 	Parameter lParam = new Parameter();
+	lParam.cDestExt = GetParamString( args, "-ThumbPrefix", lParam.cDestExt  );
+
+
 	lGenTab.process( lPath, lPath, lParam  );
 	
 	//				lGenTab.createMiniature( lSrc, 128, 128, 0, "test.jpg" );
