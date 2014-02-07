@@ -50,6 +50,7 @@ class Parameter{
     public boolean cFlagName   = false;
     public boolean cFlagWH     = false;
     public String cTabBorder   = "2";
+   public  String cFormat  = "jpg";
 
     public Parameter( ){
 	sSetExtension.add( "png" );
@@ -69,6 +70,8 @@ class Parameter{
 	cFlagName   = pParam.cFlagName;
 	cFlagWH     = pParam.cFlagWH;
 	cTabBorder   = pParam.cTabBorder;
+	cFormat  = pParam.cFormat;
+
 	//				cSetExtension = new TreeSet<String>( pParam.cSetExtension );	 
     }
 
@@ -97,19 +100,23 @@ class Parameter{
 	    }
 	    else	if( lTmp.startsWith( "COLUMNS=" )){
 		cColumns = Integer.valueOf( lTmp.substring( 8 ).trim());
-						}
+	    }
 	    else	if( lTmp.startsWith( "SIZE=" )){
 		cFlagSize = lTmp.substring( 5 ).trim().startsWith("1");
-						}
+	    }
 	    else	if( lTmp.startsWith( "NAME=" )){
 		cFlagName = lTmp.substring( 5 ).trim().startsWith("1");
-						}
+	    }
 	    else	if( lTmp.startsWith( "WH=" )){
 		cFlagWH = lTmp.substring( 3 ).trim().startsWith("1");
-						}
+	    }
 	    else	if( lTmp.startsWith( "BORDER=" )){
 		cTabBorder = lTmp.substring( 7 ).trim();
-						}
+	    }
+	    else	if( lTmp.startsWith( "FORMAT=" )){
+		cFormat = lTmp.substring( 7 ).trim();
+		System.out.println( "=================== FORMAT=" + cFormat );
+	    }
 	}
     }		
 }
@@ -124,7 +131,7 @@ class GenTabImgHtml  {
     public static boolean sEco = false;
 
     public static String sOutputPath  = null;
-    public static String sFilterExtension = "html";
+   public static String sFilterExtension = "html";
 
     static String sSign="<!--#";
     //=======
@@ -212,7 +219,7 @@ class GenTabImgHtml  {
 	Graphics2D lGrafIn = (Graphics2D)lBuffIn.getGraphics();
 	lGrafIn.drawImage( lIcon.getImage(), 0, 0, lIcon.getImageObserver() );
 	
-	Iterator lIterWriters = ImageIO.getImageWritersByFormatName("jpg"); // ou png
+	Iterator lIterWriters = ImageIO.getImageWritersByFormatName(pParam.cFormat); // ou png
 	ImageWriter lWriter = (ImageWriter)lIterWriters.next();
 	
 	
@@ -300,7 +307,7 @@ class GenTabImgHtml  {
 	    
 	    String lSrcFilePath = pPath + "/" +lLocalParam.cSrcDir  + "/" +lEntry[i];
 	    
-	    String lDestDirName = pParam.cDestExt  + lLocalParam.cSrcDir ;
+	    String lDestDirName = lLocalParam.cDestExt  + lLocalParam.cSrcDir ;
 
 	    String lDestDirPath = pPath  + "/" + lDestDirName;
 
@@ -325,19 +332,19 @@ class GenTabImgHtml  {
 
 	    lDestDirFile.mkdirs();
 	    
-	    //	    String lDestFileName =  pParam.cDestExt + lEntry[i];
-	    String lDestFileName =  pParam.cDestExt  + lDestFileNameHead + ".jpg";
+	    //	    String lDestFileName =  LocalParam.cDestExt + lEntry[i];
+	    String lDestFileName =  lLocalParam.cDestExt  + lDestFileNameHead + '.' + lLocalParam.cFormat;
 	    String lDestFilePath =  lDestDirPath + "/" + lDestFileName;
 
 	    
 	    Point lSizeThumb = new Point(0,0);
 	    Point lSizeImg   = new Point(0,0);
 
-	    if(  GenTabImgHtml.sEco == false
+	    /*	    if(  GenTabImgHtml.sEco == false
 		 || lLocalParam.cFlagSize == true
 		 || lLocalParam.cFlagWH == true ){		
-		createMiniature( lSrcFilePath, lDestFilePath, lLocalParam, lSizeThumb, lSizeImg);
-	    }
+		}*/
+	    createMiniature( lSrcFilePath, lDestFilePath, lLocalParam, lSizeThumb, lSizeImg);
 
 	    // Create Line for tab img
 	    //						process(  lPath, lLocalParam, lDecal );
@@ -644,11 +651,12 @@ class GenTabImgHtml  {
 	System.out.println("\t-OutputPath");
 	System.out.println("\t-ThumbPrefix=thumb_");
 	System.out.println("\t-PrefixIn=thg_");
-	System.out.println("\t-Extension()=.html");
+	System.out.println("\t-Extension=.html");
 	System.out.println("\t-Eco(ne cree pas les images)");
 
 
-	
+	System.out.println("\t-Format=jpg/png)");
+
 	System.exit( pExit );
     }
     //-----------------------------------------------------
@@ -674,6 +682,7 @@ class GenTabImgHtml  {
 	Parameter lParam = new Parameter();
 	lParam.cDestExt = GetParamString( args, "-ThumbPrefix", lParam.cDestExt  );
 
+	lParam.cFormat = GetParamString( args, "-Format", lParam.cFormat  );
 
 	lGenTab.process( lPath, lPath, lParam  );
 	
