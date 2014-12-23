@@ -250,14 +250,20 @@ class GenTabImgHtml  {
     public boolean makeTab( String pPath, String pSbuf, BufferedWriter pBufWrite, Parameter pParam) throws IOException {
 			
 	
-	System.out.println( "makeTab Path:" + pPath + " Buf:"+ pSbuf );
+	System.out.println( ">>> makeTab Path:" + pPath + " Buf:"+ pSbuf );
 	
 	Parameter lLocalParam = new Parameter( pParam );
 	
 	// Mise a jour des parametres 
 	lLocalParam.readFromString( pSbuf );
 	
-	String lLocalPath = pPath +"/"+lLocalParam.cSrcDir;
+	String lLocalPath = /*pPath +"/"+*/ lLocalParam.cSrcDir;
+	
+	if(lLocalPath.length() == 0)
+		lLocalPath = pPath;
+		
+	
+System.out.println( "	search into lLocalPath="+lLocalPath );
 
 	File lFile = new File( lLocalPath );
 	
@@ -305,11 +311,12 @@ class GenTabImgHtml  {
 
 	    // C'est bien un fichier image !
 	    
-	    String lSrcFilePath = pPath + "/" +lLocalParam.cSrcDir  + "/" +lEntry[i];
+	   // String lSrcFilePath = /*pPath + "/" +*/lLocalParam.cSrcDir  + "/" +lEntry[i];
+	    String lSrcFilePath = lLocalPath  + "/" +lEntry[i];
 	    
 	    String lDestDirName = lLocalParam.cDestExt  + lLocalParam.cSrcDir ;
 
-	    String lDestDirPath = pPath  + "/" + lDestDirName;
+	    String lDestDirPath = /*pPath  + "/" +*/ lDestDirName;
 
 
 	    if( sOutputPath!= null ) // NEW NEW NEW 
@@ -344,6 +351,8 @@ class GenTabImgHtml  {
 		 || lLocalParam.cFlagSize == true
 		 || lLocalParam.cFlagWH == true ){		
 		}*/
+		
+		System.out.println("call createMiniature:" + lSrcFilePath + " >>> " + lDestFilePath );
 	    createMiniature( lSrcFilePath, lDestFilePath, lLocalParam, lSizeThumb, lSizeImg);
 
 	    // Create Line for tab img
