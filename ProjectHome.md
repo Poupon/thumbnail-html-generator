@@ -1,0 +1,1 @@
+Generate thumbnails and html code from  html template and images directory
